@@ -3,9 +3,7 @@ SlamJS is a free, opensource, easy-to-use and understand JavaScript library for 
 
 #Demo Video
 
-
-https://github.com/mukulbasu/slamJsTemp/assets/1706979/584a3b0b-df5c-4cd0-87f7-c98c5779f888
-
+https://github.com/mukulbasu/slamJS/assets/1706979/688b67ba-524e-4b4d-9edb-1957472d033f
 
 
 #Installation:
