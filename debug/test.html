@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Test SLAM</title>
+    <style>
+      body {
+        font-family: arial;
+        margin: 0;
+        padding: none;
+      }
+
+      #status {
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 30px;
+        margin-left: 20px;
+        font-weight: bold;
+        color: rgb(120, 120, 120);
+      }
+
+      #progress {
+        height: 20px;
+        width: 300px;
+      }
+
+      #controls {
+        display: inline-block;
+        float: right;
+        vertical-align: top;
+        margin-top: 30px;
+        margin-right: 20px;
+      }
+
+      #output {
+        width: 100%;
+        height: 200px;
+        margin: 0 auto;
+        margin-top: 10px;
+        border-left: 0px;
+        border-right: 0px;
+        padding-left: 0px;
+        padding-right: 0px;
+        display: block;
+        background-color: black;
+        color: white;
+        font-family: 'Lucida Console', Monaco, monospace;
+        outline: none;
+      }
+    </style>
+    <script src="/js/axios.min.js"></script>
+    <script async src="/js/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "/js/three.module.js"
+            }
+        }
+    </script>
+  </head>
+  <body>
+
+    <script async type="module" src="js/test.js"></script>
+    <div style="width:100%; height: 200px;padding: 10px">
+      <button id="start" style="width:48%; height: 90%; float: left; margin: 5px;">Start</button>
+      <button id="stop" style="width:48%; height: 90%; float: left; margin: 5px">Stop</button>
+    </div>
+    <div style="width:100%; height: auto;padding: 10px">
+      <video autoplay="true" id="srcVideo"></video>
+      <canvas height="640" width="480" id="canvasVideo"></canvas>
+    </div>
+    <h2 id="orient"></h2>
+    <canvas style="width:100%; height: 980px" id="canvas3D"></canvas>
+  </body>
+</html>
+
+

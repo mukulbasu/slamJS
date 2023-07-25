@@ -1,0 +1,15 @@
+debug.txt
+debug/logs/*
+debug/node_modules/*
+debug/tmp
+debug/yarn.lock
+node_modules/*
+tmp
+yarn.lock
+build/*
+data/*
+*.bak
+*.DS_Store
+third_party/src/g2o/build/*
+archive/*
+docs/*
