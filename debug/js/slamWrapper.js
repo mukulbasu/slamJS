@@ -31,7 +31,6 @@ let acceleration = {x : 0, y : 0, z : 0};
 let latestTrans = [0, 0, 0];
 let latestVel = [0, 0, 0];
 let startAR = false;
-let frameProcessTime = Date.now();
 let kpExtractTime = Date.now();
 let debugPose;
 
@@ -108,12 +107,14 @@ let toggleDebug = true;
 document.getElementById("toggleDebug").onclick = () => {
   if (toggleDebug) {
     toggleDebug = false;
+    debugPose.stop();
     document.getElementById("stats").style.visibility = "hidden";
-    document.getElementById("threejs-debug-pose-container").style.visibility = "hidden";
+    document.getElementById("threejs-debug-pose-container-wrapper").style.visibility = "hidden";
   } else {
     toggleDebug = true;
+    debugPose.start();
     document.getElementById("stats").style.visibility = "visible";
-    document.getElementById("threejs-debug-pose-container").style.visibility = "visible";
+    document.getElementById("threejs-debug-pose-container-wrapper").style.visibility = "visible";
   }
 }
 
@@ -166,8 +167,6 @@ const processImage = ({imageData, x, y, z, order}) => {
     slamWorker.postMessage({operation: "process_image", imageData, x, y, z, order, timestamp: Date.now()});
     kpExtractTime = 0;
   }
-
-  frameProcessTime = Date.now();
 }
 
 //Capture image for processing pose
@@ -178,8 +177,8 @@ const captureImage = () => {
   const imageData = ctx.getImageData(0, 0, width, height);
   setTimeout(captureImage, 0);
 
-  if (queueCount < 2) {
-    console.log("Capturing image");
+  if (queueCount < 4) {
+    console.log("Capturing image", queueCount);
     processImage({...rotation, imageData});
     queueCount = queueCount + 1;
   }
@@ -198,6 +197,7 @@ const startVideo = (mediaStream) => {
   document.getElementById("startAR").disabled = false;
   cameraAR = arRender("threejs-ar-container", 180.0*Math.atan(640.0/(250*2))/Math.PI);
   debugPose = debugPoseRender("threejs-debug-pose-container");
+  if (toggleDebug) debugPose.start();
 };
 
 const slamWorker = new Worker("js/slamWorker.js");
@@ -215,7 +215,7 @@ const eventHandler = (e) => {
     ratios[1] = (trans[1] - latestTrans[1])/(lastTransComputed[1] - latestTrans[1]);
     ratios[2] = (trans[2] - latestTrans[2])/(lastTransComputed[2] - latestTrans[2]);
 
-    console.log("Translations: ", trans[0], trans[1], trans[2], ", ", Date.now() - frameProcessTime, "ms",
+    console.log("Translations: ", trans[0], trans[1], trans[2], ", ", e.data.processingTime, "ms",
       "lastTransComputed", lastTransComputed[0]-latestTrans[0], "vs", trans[0] - latestTrans[0], 
       ":", lastTransComputed[1]-latestTrans[1], "vs", trans[1] - latestTrans[1], 
       "ratios", ratios[0], ratios[1], ratios[2]);
@@ -236,7 +236,7 @@ const eventHandler = (e) => {
       cameraAR.update(latestTrans, rot);
     }
     debugPose.updateCurrentFrame(latestTrans, rot);
-    document.getElementById("time").textContent = `Time : Last Trans = ${(Date.now() - lastTransTime).toString()} / Frame Process = ${(Date.now() - frameProcessTime).toString()} / KP Extract = ${kpExtractTime} ms`;
+    document.getElementById("time").textContent = `Time : Last Trans = ${(Date.now() - lastTransTime)} / Frame Process = ${e.data.processingTime} / KP Extract = ${kpExtractTime} ms`;
     document.getElementById("result").textContent = `Result : ${e.data.result}`;
     
     queueCount = queueCount - 1;

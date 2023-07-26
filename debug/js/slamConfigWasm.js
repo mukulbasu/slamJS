@@ -55,7 +55,7 @@ const SlamConfig = {
     maxDistRatio: "0.2",
     maxAngle: "30",
     copyRotation: "t",
-    findFocus: "f",
+    findFocus: "t",
     normalizeKP: "t",
     debugFrameId: "-1",
     disableRotationInput: "f",

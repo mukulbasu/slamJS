@@ -74,13 +74,23 @@ const pose_processed = ({result, startTime, x, y, z, order}) => {
   console.log("Translations Added image ", Date.now() - startTime, "ms, Result is ", resultTranslation(result));
 
   const keyframeCount = Module._get_keyframe_count(slam);
+  let translations, velocity;
   if (initialized) {
-    const translations = [Module._get_smooth_trans(slam, 0), Module._get_smooth_trans(slam, 1), Module._get_smooth_trans(slam, 2)];
-    const velocity = [Module._get_smooth_vel(slam, 0), Module._get_smooth_vel(slam, 1), Module._get_smooth_vel(slam, 2)]
-    postMessage({operation: "translations", translations, rotations: {x, y, z, order}, velocity, result: resultTranslation(result), keyframeCount});
+    translations = [Module._get_smooth_trans(slam, 0), Module._get_smooth_trans(slam, 1), Module._get_smooth_trans(slam, 2)];
+    velocity = [Module._get_smooth_vel(slam, 0), Module._get_smooth_vel(slam, 1), Module._get_smooth_vel(slam, 2)];
   } else {
-    postMessage({operation: "translations", translations: [0, 0, 0], rotations: {x, y, z, order}, velocity: [0, 0, 0], result: resultTranslation(result), keyframeCount});
+    translations = [0, 0, 0];
+    velocity = [0, 0, 0];
   }
+  postMessage({
+    operation: "translations", 
+    translations, 
+    rotations: {x, y, z, order}, 
+    velocity, 
+    result: resultTranslation(result), 
+    keyframeCount,
+    processingTime: Date.now() - startTime
+  });
 }
 
 //Setting up the function to handle incoming messages to worker

@@ -310,10 +310,6 @@ class PoseManager {
                     }
                 }
             }
-            // auto focuses = vector<int>{250, 255, 260, 265, 270, 275};
-            // auto focuses = vector<int>{200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500};
-            auto focuses = vector<int>{240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290};
-            // auto focuses = vector<int>{270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280};
             float minError = 9999999;
             int selectedFocus = 0;
             auto fixedFrames = make_shared<FrameSet>();
@@ -677,7 +673,7 @@ class PoseManager {
                                 _initialized = true;
                                 right_scale(0, 100, _cfg.scale);
                                 _fm->populate_frame_landmark_dist_threshold(newFrameSet);
-                                auto selectedFocus = find_focus(currFrame, 200, 500, 5);
+                                auto selectedFocus = find_focus(currFrame, 160*_cfg.cx/240, 500*_cfg.cx/240, 5);
                                 LOG("Selected Focus "<<selectedFocus<<endl);
                                 if (selectedFocus > 0) {
                                     _cfg.fx = selectedFocus;
