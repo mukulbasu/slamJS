@@ -330,19 +330,13 @@ const debugPoseRender = (domElementId) => {
     return result;
   }
 
+  const keyFrameObjs = [];
+  let originObj = null, currentObj = null;
+  const CameraObjTypes = ['currentObj', 'originObj', 'keyFrameObj'];
   const update = () => {
-    const keyFrameObjs = [];
-    let originObj = null, currentObj = null;
     scene.children.forEach(child => {
-      if (child.name === "keyFrameObj") {
-        keyFrameObjs.push(child);
-      } else if (child.name === "originObj") {
-        originObj = child;
-      } else if (child.name === "currentObj") {
-        currentObj= child;
-      }
+      if (CameraObjTypes.includes(child.name)) scene.remove(child);
     });
-
     const setPose = (obj, trans, rots) => {
       obj.position.set(...trans);
       obj.rotation.set(0, 0, 0);
@@ -354,39 +348,39 @@ const debugPoseRender = (domElementId) => {
     const allTrans = [...keyframeTrans, latestTrans];
     const allRots = [...keyframeRots, latestRots];
     for (const index in allTrans) {
-        const trans = allTrans[index];
-        const rots = allRots[index];
-        if (trans) {
-          let obj;
-          if (index == allTrans.length-1) {
-            if (currentObj == null) {
-              obj = cameraObj({current: true, origin: false});
-              obj.name = "currentObj";
-              scene.add(obj);
-            } else {
-              obj = currentObj;
-            }
-          } else if (index == 0) {
-            if (originObj == null) {
-              obj = cameraObj({current: false, origin: true});
-              obj.name = "originObj";
-              scene.add(obj);
-            } else {
-              obj = originObj;
-            }
+      const trans = allTrans[index];
+      const rots = allRots[index];
+      if (trans) {
+        let obj;
+        if (index == allTrans.length-1) {
+          if (currentObj == null) {
+            obj = cameraObj({current: true, origin: false});
+            obj.name = "currentObj";
+            currentObj = obj;
           } else {
-            if (keyFrameObjs.length > 0) {
-              obj = keyFrameObjs.pop();
-            } else {
-              obj = cameraObj({current: false, origin: false});
-              obj.name = "keyFrameObj";
-              scene.add(obj);
-            }
+            obj = currentObj;
           }
-          setPose(obj, trans, rots);
+        } else if (index == 0) {
+          if (originObj == null) {
+            obj = cameraObj({current: false, origin: true});
+            obj.name = "originObj";
+            originObj = obj;
+          } else {
+            obj = originObj;
+          }
+        } else {
+          if (keyFrameObjs.length > 0) {
+            obj = keyFrameObjs.pop();
+          } else {
+            obj = cameraObj({current: false, origin: false});
+            obj.name = "keyFrameObj";
+            keyFrameObjs.push(obj);
+          }
         }
+        scene.add(obj);
+        setPose(obj, trans, rots);
+      }
     }
-    keyFrameObjs.forEach(child => scene.remove(child));
   }
 
   return {
