@@ -1,6 +1,7 @@
 debug.txt
 debug/logs/*
 debug/node_modules/*
+debug/react/node_modules/*
 debug/tmp
 debug/yarn.lock
 node_modules/*

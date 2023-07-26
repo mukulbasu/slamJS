@@ -122,6 +122,25 @@ const addMarkerCubes = (scene) => {
   scene.add(Cube(0xff9999, [2,2,2], [0,6,12]));
 }
 
+const getMarkerCubes = () => {
+  const cubes = [];
+  //RED for X
+  cubes.push(Cube(0xff0000, [1,1,1], [10, 0, 0]));
+  cubes.push(Cube(0x00ff00, [0.5,0.5,0.5], [10, 1, 0]));
+  cubes.push(Cube(0x0000ff, [0.5,0.5,0.5], [10, 0, 1]));
+  //GREEN for Y
+  cubes.push(Cube(0x00ff00, [1,1,1], [0, 10, 0]));
+  cubes.push(Cube(0x0000ff, [0.5,0.5,0.5], [0, 10, 1]));
+  cubes.push(Cube(0xff0000, [0.5,0.5,0.5], [1, 10, 0]));
+  //BLUE for Z
+  cubes.push(Cube(0x0000ff, [1,1,1], [0, 0, 10]));
+  cubes.push(Cube(0x00ff00, [0.5,0.5,0.5], [0, 1, 10]));
+  cubes.push(Cube(0xff0000, [0.5,0.5,0.5], [1, 0, 10]));
+
+  cubes.push(Cube(0xff9999, [2,2,2], [0,6,12]));
+  return cubes;
+}
+
 const arRender = (arDomId, fov) => {
   const threejsContainer = document.getElementById(arDomId);
   const threejsWidth = threejsContainer.offsetWidth;
@@ -192,85 +211,92 @@ const debugPoseRender = (domElementId) => {
   const floorDepth = 250;
   const gridSize = floorDepth * 2;
   const floorPositions = [0, -floorDepth, 0];
-  const scene = new THREE.Scene();
   const canvas = document.getElementById(domElementId);
-  const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-  renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
 
   const dirLight1 = new THREE.DirectionalLight(0xffffff);
   dirLight1.position.set(1000, 1000, -1000);
-  scene.add(dirLight1);
-
   const dirLight2 = new THREE.DirectionalLight(0xffffff);
   dirLight2.position.set(-1000, -1000, -1000);
-  scene.add(dirLight2);
-
   const dirLight3 = new THREE.DirectionalLight(0xffffff);
   dirLight3.position.set(0, 0, 1000);
-  scene.add(dirLight3);
-
   const ambientLight = new THREE.AmbientLight(0x222222);
-  scene.add(ambientLight);
-
-  // scene.background = new THREE.Color(0xffffff);
-  // scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
-
-  const floor = new THREE.GridHelper(gridSize, 15, 0x808080, 0x808080);
-  floor.position.set(...floorPositions);
-  // scene.add( floor );
 
   const pos = [
-      [0, floorDepth, 0],
-      [0, -floorDepth, 0],
-      [floorDepth, 0, 0],
-      [-floorDepth, 0, 0],
-      [0, 0, floorDepth],
-      [0, 0, -floorDepth],
+    [0, floorDepth, 0],
+    [0, -floorDepth, 0],
+    [floorDepth, 0, 0],
+    [-floorDepth, 0, 0],
+    [0, 0, floorDepth],
+    [0, 0, -floorDepth],
   ]
+  const floors = [];
   for (let i = 0; i < 6; i++) {
-      const floors = new THREE.GridHelper(gridSize, 5, 0x808080, 0x808080);
-      floors.position.set(...pos[i]);
+      const floor = new THREE.GridHelper(gridSize, 5, 0x808080, 0x808080);
+      floor.position.set(...pos[i]);
       if (i > 3) {
-          floors.rotation.set(Math.PI / 2, 0, 0);
+          floor.rotation.set(Math.PI / 2, 0, 0);
       } else if (i > 1) {
-          floors.rotation.set(0, 0, Math.PI / 2);
+          floor.rotation.set(0, 0, Math.PI / 2);
       }
-      scene.add(floors);
+      floors.push(floor);
   }
 
-  addMarkerCubes(scene);
+  const markerCubes = getMarkerCubes();
+  let scene = null, camera = null, controls = null, renderer = null, started = false;
 
-  const camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 100000);
-  camera.position.set(9, -12, -27);
-  camera.up.set(0, -1, 0);
-	camera.rotation.reorder( "YXZ" );
-  scene.add(camera);
-  
-  // const axesHelper = new THREE.AxesHelper( 5 );
-  // scene.add( axesHelper );
+  const start = () => {
+    scene = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
 
-  const controls = new TrackballControls(camera, renderer.domElement);
+    scene.add(dirLight1);
+    scene.add(dirLight2);
+    scene.add(dirLight3);
+    scene.add(ambientLight);
+    floors.forEach(floor => scene.add(floor));
+    markerCubes.forEach(markerCube => scene.add(markerCube));
 
-  controls.rotateSpeed = 1.0;
-  controls.zoomSpeed = 1.2;
-  controls.panSpeed = 0.8;
+    // scene.background = new THREE.Color(0xffffff);
+    // scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
 
-  controls.keys = ['KeyA', 'KeyS', 'KeyD'];
+    camera = new THREE.PerspectiveCamera(75, canvas.offsetWidth / canvas.offsetHeight, 0.1, 100000);
+    camera.position.set(9, -12, -27);
+    camera.up.set(0, -1, 0);
+    camera.rotation.reorder( "YXZ" );
+    scene.add(camera);
+    
+    // const axesHelper = new THREE.AxesHelper( 5 );
+    // scene.add( axesHelper );
 
-  window.addEventListener('resize', () => {
-      camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+    controls = new TrackballControls(camera, renderer.domElement);
 
-      controls.handleResize();
-  });
-  function animate() {
-    requestAnimationFrame(animate);
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
 
-    controls.update();
-    renderer.render(scene, camera);
+    controls.keys = ['KeyA', 'KeyS', 'KeyD'];
+    started = true;
+
+    window.addEventListener('resize', () => {
+        camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+
+        controls.handleResize();
+    });
+    function animate() {
+      requestAnimationFrame(animate);
+      if (started) {
+        controls.update();
+        renderer.render(scene, camera);
+      }
+    }
+    animate();
   }
-  animate();
+
+  const stop = () => {
+    started = false;
+  }
 
   let keyframeTrans = [], keyframeRots = [], latestTrans, latestRots;
 
@@ -374,6 +400,8 @@ const debugPoseRender = (domElementId) => {
       latestRots = rots;
       update();
     },
+    start, 
+    stop
   }
 }
 
